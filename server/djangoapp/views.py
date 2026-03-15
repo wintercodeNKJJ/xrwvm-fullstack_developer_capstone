@@ -1,21 +1,24 @@
+from datetime import datetime
+import json
+import logging
+
+from django.contrib import messages
+from django.contrib.auth import login, authenticate
+from django.contrib.auth import logout
+from django.contrib.auth.models import User
+from django.http import JsonResponse
+from django.shortcuts import get_object_or_404, render, redirect
+from django.shortcuts import render
+from django.views.decorators.csrf import csrf_exempt
+
+from .models import CarMake, CarModel
+from .populate import initiate
+from .restapis import get_request, analyze_review_sentiments, post_review
+
 # Uncomment the required imports before adding the code
 
-from django.shortcuts import render
 # from django.http import HttpResponseRedirect, HttpResponse
-from django.contrib.auth.models import User
-from django.shortcuts import get_object_or_404, render, redirect
-from django.contrib.auth import logout
-from django.contrib import messages
-from datetime import datetime
 
-from django.http import JsonResponse
-from django.contrib.auth import login, authenticate
-import logging
-import json
-from django.views.decorators.csrf import csrf_exempt
-from .populate import initiate
-from .models import CarMake, CarModel
-from .restapis import get_request, analyze_review_sentiments, post_review
 
 
 # Get an instance of a logger
@@ -26,6 +29,7 @@ logger = logging.getLogger(__name__)
 
 # Create a `login_request` view to handle sign in request
 @csrf_exempt
+
 def login_user(request):
     # Get username and password from request.POST dictionary
     data = json.loads(request.body)
@@ -41,6 +45,7 @@ def login_user(request):
     return JsonResponse(data)
 
 # Create a `logout_request` view to handle sign out request
+
 def logout_request(request):
     # Terminate user session
     data = {"userName": ""} 
@@ -50,6 +55,7 @@ def logout_request(request):
 
 # Create a `registration` view to handle sign up request
 @csrf_exempt
+
 def registration(request):
     context = {}
 
@@ -91,11 +97,12 @@ def registration(request):
 # Update the `get_dealerships` render 
 # list of dealerships all by default, 
 # particular state if state is passed
-def get_dealerships(request, state="All"):
-    if (state == "All"):
-        endpoint = "/fetchDealers"
+
+def get_dealerships(request, state='All'):
+    if (state == 'All'):
+        endpoint = '/fetchDealers'
     else:
-        endpoint = "/fetchDealers/"+state
+        endpoint = '/fetchDealers/'+state
     dealerships = get_request(endpoint)
     return JsonResponse({"status":200,"dealers":dealerships})
 
@@ -104,10 +111,11 @@ def get_dealerships(request, state="All"):
 # view to render the reviews of a dealer
 # def get_dealer_reviews(request,dealer_id):
 # ...
+
 def get_dealer_reviews(request, dealer_id):
     # if dealer id has been provided
     if (dealer_id):
-        endpoint = "/fetchReviews/dealer/"+str(dealer_id)
+        endpoint = '/fetchReviews/dealer/'+str(dealer_id)
         reviews = get_request(endpoint)
         for review_detail in reviews:
             response = analyze_review_sentiments(review_detail['review'])
@@ -121,9 +129,10 @@ def get_dealer_reviews(request, dealer_id):
 # Create a `get_dealer_details` view to render the dealer details
 # def get_dealer_details(request, dealer_id):
 # ...
+
 def get_dealer_details(request, dealer_id):
     if (dealer_id):
-        endpoint = "/fetchDealer/"+str(dealer_id)
+        endpoint = '/fetchDealer/'+str(dealer_id)
         dealership = get_request(endpoint)
         return JsonResponse({"status":200,"dealer":dealership})
     else:
@@ -133,6 +142,7 @@ def get_dealer_details(request, dealer_id):
 # Create a `add_review` view to submit a review
 # def add_review(request):
 # ...
+
 def add_review(request):
     if (request.user.is_anonymous is False):
         data = json.loads(request.body)
@@ -144,6 +154,7 @@ def add_review(request):
             return JsonResponse({"status":401,"message": "Error in posting review"})
     else:
         return JsonResponse({"status":403,"message": "Unauthorized"})
+
 
 
 def get_cars(request):
